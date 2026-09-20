@@ -1,0 +1,2261 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Школьная система баллов</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .container {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      max-width: 900px;
+      width: 100%;
+      overflow: hidden;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 30px;
+      text-align: center;
+    }
+
+    .header h1 {
+      font-size: 28px;
+      margin-bottom: 10px;
+    }
+
+    .header p {
+      opacity: 0.9;
+    }
+
+    .content {
+      padding: 40px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      color: #333;
+      font-weight: 600;
+    }
+
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 12px 15px;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      font-size: 16px;
+      transition: border-color 0.3s;
+    }
+
+    .form-group input:focus, .form-group select:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+
+    .btn {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 12px 30px;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      width: 100%;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-secondary {
+      background: #6c757d;
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    }
+
+    .btn-danger {
+      background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    }
+
+    .btn-small {
+      padding: 8px 15px;
+      font-size: 14px;
+      width: auto;
+    }
+
+    .error {
+      background: #f8d7da;
+      color: #721c24;
+      padding: 12px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+
+    .success {
+      background: #d4edda;
+      color: #155724;
+      padding: 12px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .card {
+      background: #f8f9fa;
+      border-radius: 15px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .card h3 {
+      color: #667eea;
+      margin-bottom: 15px;
+    }
+
+    .balance-display {
+      text-align: center;
+      padding: 30px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 15px;
+      color: white;
+      margin-bottom: 20px;
+    }
+
+    .balance-display .amount {
+      font-size: 48px;
+      font-weight: bold;
+    }
+
+    .balance-display .label {
+      opacity: 0.9;
+      font-size: 18px;
+    }
+
+    .nav {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+    }
+
+    .nav button {
+      flex: 1;
+      min-width: 150px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+
+    table th, table td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    table th {
+      background: #667eea;
+      color: white;
+    }
+
+    table tr:hover {
+      background: #f8f9fa;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .badge-pending {
+      background: #ffc107;
+      color: #000;
+    }
+
+    .badge-approved {
+      background: #28a745;
+      color: white;
+    }
+
+    .badge-rejected {
+      background: #dc3545;
+      color: white;
+    }
+
+    .role-badge {
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .role-student {
+      background: #17a2b8;
+      color: white;
+    }
+
+    .role-teacher {
+      background: #28a745;
+      color: white;
+    }
+
+    .role-moderator {
+      background: #fd7e14;
+      color: white;
+    }
+
+    .role-owner {
+      background: #6f42c1;
+      color: white;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .stat-card {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px;
+      border-radius: 15px;
+      text-align: center;
+    }
+
+    .stat-card .number {
+      font-size: 32px;
+      font-weight: bold;
+    }
+
+    .stat-card .label {
+      opacity: 0.9;
+      font-size: 14px;
+    }
+
+    .logout-btn {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: rgba(255,255,255,0.2);
+      color: white;
+      border: 2px solid white;
+      padding: 8px 20px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .logout-btn:hover {
+      background: white;
+      color: #667eea;
+    }
+
+    .dashboard-wrapper {
+      position: relative;
+    }
+
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .modal.hidden {
+      display: none !important;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 30px;
+      border-radius: 20px;
+      max-width: 500px;
+      width: 90%;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal-content h3 {
+      margin-bottom: 20px;
+      color: #667eea;
+    }
+
+    .modal-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .modal-buttons .btn {
+      flex: 1;
+    }
+
+    /* Device Selection Styles */
+    .device-selection {
+      text-align: center;
+    }
+
+    .device-options {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-top: 30px;
+    }
+
+    .device-option {
+      background: #f8f9fa;
+      border-radius: 15px;
+      padding: 40px 20px;
+      cursor: pointer;
+      transition: all 0.3s;
+      border: 3px solid transparent;
+    }
+
+    .device-option:hover {
+      border-color: #667eea;
+      transform: translateY(-5px);
+    }
+
+    .device-option.selected {
+      border-color: #667eea;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .device-option .icon {
+      font-size: 64px;
+      margin-bottom: 15px;
+    }
+
+    .device-option .title {
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    .device-option .desc {
+      font-size: 14px;
+      opacity: 0.8;
+      margin-top: 10px;
+    }
+
+    /* User rank display */
+    .user-rank-card {
+      background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+      color: white;
+      padding: 20px;
+      border-radius: 15px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .user-rank-card .rank-number {
+      font-size: 48px;
+      font-weight: bold;
+    }
+
+    .user-rank-card .rank-label {
+      opacity: 0.9;
+      font-size: 16px;
+    }
+
+    /* Leaderboard scrollable */
+    .leaderboard-container {
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
+    .my-rank-row {
+      background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
+      color: white !important;
+    }
+
+    .my-rank-row td {
+      color: white !important;
+    }
+
+    @media (max-width: 600px) {
+      .content {
+        padding: 20px;
+      }
+      
+      .nav {
+        flex-direction: column;
+      }
+      
+      .nav button {
+        width: 100%;
+      }
+
+      .device-options {
+        grid-template-columns: 1fr;
+      }
+
+      .balance-display .amount {
+        font-size: 36px;
+      }
+
+      table {
+        font-size: 14px;
+      }
+
+      table th, table td {
+        padding: 8px;
+      }
+
+      .modal-content {
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Device Selection -->
+    <div id="device-selection" class="hidden">
+      <div class="header">
+        <h1>🎓 Школьная система баллов</h1>
+        <p>Выберите тип устройства</p>
+      </div>
+      <div class="content device-selection">
+        <div class="device-options">
+          <div class="device-option" onclick="selectDevice('desktop')">
+            <div class="icon">💻</div>
+            <div class="title">Компьютер</div>
+            <div class="desc">Полная версия для ПК и ноутбуков</div>
+          </div>
+          <div class="device-option" onclick="selectDevice('mobile')">
+            <div class="icon">📱</div>
+            <div class="title">Телефон</div>
+            <div class="desc">Мобильная версия для смартфонов</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Login Form -->
+    <div id="login-form" class="hidden">
+      <div class="header">
+        <h1>🎓 Школьная система баллов</h1>
+        <p id="device-info-text">Войдите в систему для продолжения</p>
+      </div>
+      <div class="content">
+        <div id="login-error" class="error hidden"></div>
+        <div class="form-group">
+          <label>Имя пользователя</label>
+          <input type="text" id="username" placeholder="Введите имя пользователя">
+        </div>
+        <div class="form-group">
+          <label>Пароль</label>
+          <input type="password" id="password" placeholder="Введите пароль">
+        </div>
+        <button class="btn" onclick="login()">Войти</button>
+        <p style="text-align: center; margin-top: 15px;">
+          <a href="#" onclick="changeDevice()" style="color: #667eea;">← Сменить устройство</a>
+        </p>
+      </div>
+    </div>
+
+    <!-- Dashboard -->
+    <div id="dashboard" class="hidden">
+      <div class="dashboard-wrapper">
+        <button class="logout-btn" onclick="logout()">Выйти</button>
+        <div class="header">
+          <h1>🎓 Панель управления</h1>
+          <p id="user-info"></p>
+        </div>
+        <div class="content">
+          <div id="dashboard-content"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let token = localStorage.getItem('token');
+    let currentUser = null;
+    let deviceType = localStorage.getItem('deviceType') || null;
+
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      if (!deviceType) {
+        // Show device selection
+        document.getElementById('device-selection').classList.remove('hidden');
+      } else if (token) {
+        fetchCurrentUser();
+      } else {
+        showLoginForm();
+      }
+    });
+
+    function selectDevice(type) {
+      deviceType = type;
+      localStorage.setItem('deviceType', type);
+      
+      // Update UI based on device
+      if (type === 'mobile') {
+        document.querySelector('.container').style.maxWidth = '100%';
+        document.querySelector('.container').style.borderRadius = '0';
+        document.body.style.padding = '0';
+      }
+      
+      document.getElementById('device-selection').classList.add('hidden');
+      
+      if (token) {
+        fetchCurrentUser();
+      } else {
+        showLoginForm();
+      }
+    }
+
+    function showLoginForm() {
+      document.getElementById('login-form').classList.remove('hidden');
+      const deviceText = deviceType === 'mobile' ? '(Мобильная версия)' : '(Версия для ПК)';
+      document.getElementById('device-info-text').textContent = deviceText + ' Войдите в систему';
+    }
+
+    function changeDevice() {
+      localStorage.removeItem('deviceType');
+      deviceType = null;
+      document.getElementById('login-form').classList.add('hidden');
+      document.getElementById('device-selection').classList.remove('hidden');
+      // Reset styles
+      document.querySelector('.container').style.maxWidth = '';
+      document.querySelector('.container').style.borderRadius = '';
+      document.body.style.padding = '';
+    }
+
+    async function fetchCurrentUser() {
+      try {
+        const res = await fetch('/api/me', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+          currentUser = await res.json();
+          // Ensure all properties are loaded
+          if (!currentUser.profile_color) currentUser.profile_color = '#667eea';
+          showDashboard();
+        } else {
+          localStorage.removeItem('token');
+          token = null;
+          showLoginForm();
+        }
+      } catch (err) {
+        console.error(err);
+        showLoginForm();
+      }
+    }
+
+    async function login() {
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      
+      if (!username || !password) {
+        showError('login-error', 'Заполните все поля');
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+
+        const data = await res.json();
+        
+        if (res.ok) {
+          token = data.token;
+          currentUser = data.user;
+          localStorage.setItem('token', token);
+          showDashboard();
+        } else {
+          showError('login-error', data.error);
+        }
+      } catch (err) {
+        showError('login-error', 'Ошибка соединения с сервером');
+      }
+    }
+
+    function logout() {
+      localStorage.removeItem('token');
+      token = null;
+      currentUser = null;
+      document.getElementById('dashboard').classList.add('hidden');
+      showLoginForm();
+    }
+
+    function showDashboard() {
+      document.getElementById('login-form').classList.add('hidden');
+      document.getElementById('device-selection').classList.add('hidden');
+      document.getElementById('dashboard').classList.remove('hidden');
+      
+      // Apply mobile styles if needed
+      if (deviceType === 'mobile') {
+        document.querySelector('.container').style.maxWidth = '100%';
+        document.querySelector('.container').style.borderRadius = '0';
+        document.body.style.padding = '0';
+      }
+      
+      const roleNames = {
+        student: 'Ученик',
+        teacher: 'Учитель',
+        moderator: 'Модератор',
+        owner: 'Владелец'
+      };
+      
+      document.getElementById('user-info').textContent = 
+        `${currentUser.username} • ${roleNames[currentUser.role]}`;
+      
+      renderDashboard();
+    }
+
+    function renderDashboard() {
+      const content = document.getElementById('dashboard-content');
+      
+      switch (currentUser.role) {
+        case 'student':
+          content.innerHTML = getStudentDashboard();
+          loadStudentData();
+          break;
+        case 'teacher':
+          content.innerHTML = getTeacherDashboard();
+          loadStudents();
+          break;
+        case 'moderator':
+        case 'owner':
+          content.innerHTML = getModeratorDashboard();
+          loadModeratorData();
+          break;
+      }
+    }
+
+    function getStudentDashboard() {
+      return `
+        <div class="balance-display" id="profile-display">
+          <div class="label">Ваш баланс</div>
+          <div class="amount" id="balance">${currentUser.balance}</div>
+          <div class="label">баллов</div>
+          <div style="margin-top: 10px; opacity: 0.9;">
+            ID: ${currentUser.id} | Класс: ${currentUser.class || 'Не указан'}
+            ${currentUser.title ? `<br>🏆 ${currentUser.title}` : ''}
+          </div>
+        </div>
+        
+        <div class="nav">
+          <button class="btn btn-success" onclick="showImmunityModal()">📝 Переписать работу (50 баллов)</button>
+          <button class="btn" onclick="showBellModal()">🎵 Песня на перемене (40 баллов)</button>
+          <button class="btn" onclick="showProfileSection()">👤 Профиль</button>
+          <button class="btn" onclick="showLeaderboard()">🏆 Лидеры</button>
+          <button class="btn" onclick="showSearchModal()">🔍 Поиск</button>
+          <button class="btn btn-secondary" onclick="loadStudentData()">🔄 Обновить</button>
+        </div>
+        
+        <div id="student-content">
+          <div class="card">
+            <h3>📝 История транзакций</h3>
+            <table id="transactions-table">
+              <thead>
+                <tr>
+                  <th>От кого</th>
+                  <th>Сумма</th>
+                  <th>Причина</th>
+                  <th>Дата</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+
+          <div class="card">
+            <h3>📋 Мои запросы</h3>
+            <table id="requests-table">
+              <thead>
+                <tr>
+                  <th>Тип</th>
+                  <th>Детали</th>
+                  <th>Стоимость</th>
+                  <th>Статус</th>
+                  <th>Дата</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Modal for Immunity -->
+        <div id="immunity-modal" class="modal hidden">
+          <div class="modal-content">
+            <h3>📝 Переписать любую работу</h3>
+            <div class="form-group">
+              <label>Выберите предмет:</label>
+              <select id="immunity-subject">
+                <option value="">-- Выберите предмет --</option>
+                <option value="Математика">Математика</option>
+                <option value="Русский язык">Русский язык</option>
+                <option value="Литература">Литература</option>
+                <option value="Физика">Физика</option>
+                <option value="Химия">Химия</option>
+                <option value="Биология">Биология</option>
+                <option value="История">История</option>
+                <option value="Обществознание">Обществознание</option>
+                <option value="География">География</option>
+                <option value="Английский язык">Английский язык</option>
+                <option value="Информатика">Информатика</option>
+                <option value="Физкультура">Физкультура</option>
+                <option value="ОБЖ">ОБЖ</option>
+                <option value="Музыка">Музыка</option>
+                <option value="ИЗО">ИЗО</option>
+                <option value="Технология">Технология</option>
+              </select>
+            </div>
+            <p style="color: #666; margin-bottom: 15px;">Стоимость: <strong>50 баллов</strong></p>
+            <p style="color: #e74c3c; margin-bottom: 15px; font-size: 14px;">⚠️ Доступно ученикам с 5 класса. Можно использовать раз в день.</p>
+            <div class="modal-buttons">
+              <button class="btn btn-success" onclick="requestImmunity()">Отправить</button>
+              <button class="btn btn-secondary" onclick="closeModal('immunity-modal')">Отмена</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Modal for Bell -->
+        <div id="bell-modal" class="modal hidden">
+          <div class="modal-content">
+            <h3>🎵 Песня на перемене</h3>
+            <div class="form-group">
+              <label>Тип запроса:</label>
+              <select id="bell-type" onchange="updateBellForm()">
+                <option value="song_link">🔗 Ссылка на песню</option>
+                <option value="song_name">📝 Название песни</option>
+                <option value="video">🎬 Видео</option>
+              </select>
+            </div>
+            
+            <!-- Ссылка на песню -->
+            <div id="bell-link-field" class="form-group">
+              <label>Ссылка на песню (YouTube или MP3):</label>
+              <input type="text" id="bell-song-link" placeholder="https://youtube.com/... или ссылка на MP3">
+            </div>
+            
+            <!-- Название песни -->
+            <div id="bell-name-field" class="form-group hidden">
+              <label>Название песни и исполнитель:</label>
+              <input type="text" id="bell-song-name" placeholder="Например: Blinding Lights - The Weeknd">
+            </div>
+            
+            <!-- Видео -->
+            <div id="bell-video-field" class="form-group hidden">
+              <label>Файл видео:</label>
+              <input type="file" id="bell-video-file" accept="video/*" style="padding: 10px;">
+              <p style="color: #666; font-size: 12px; margin-top: 5px;">Максимум 50MB</p>
+            </div>
+            
+            <p style="color: #666; margin-bottom: 15px;">Стоимость: <strong>40 баллов</strong></p>
+            <p style="color: #e74c3c; margin-bottom: 15px; font-size: 14px;">⚠️ Доступно ученикам с 5 класса. Можно использовать раз в день.</p>
+            <div class="modal-buttons">
+              <button class="btn btn-success" onclick="requestBell()">Отправить</button>
+              <button class="btn btn-secondary" onclick="closeModal('bell-modal')">Отмена</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Modal for Profile -->
+        <div id="profile-modal" class="modal hidden">
+          <div class="modal-content" style="max-width: 700px;">
+            <h3>👤 Мой профиль</h3>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+              <div>
+                <div class="form-group">
+                  <label>Цвет профиля:</label>
+                  <input type="color" id="profile-color" value="${currentUser.profile_color || '#667eea'}" style="width: 100%; height: 50px; border: none; cursor: pointer;">
+                </div>
+                <button class="btn btn-success" onclick="updateProfileColor()" style="width: 100%;">Сохранить цвет</button>
+              </div>
+              
+              <div>
+                <div class="form-group">
+                  <label>Мой титул:</label>
+                  <select id="title-select" style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 10px;">
+                    <option value="">Без титула</option>
+                  </select>
+                </div>
+                <button class="btn btn-success" onclick="updateTitle()" style="width: 100%;">Установить титул</button>
+              </div>
+              
+              <div>
+                <h4 style="margin-bottom: 10px;">🏆 Мои значки</h4>
+                <div id="my-badges" style="display: flex; flex-wrap: wrap; gap: 10px; min-height: 50px;">
+                  Загрузка...
+                </div>
+              </div>
+            </div>
+            
+            <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e0e0e0;">
+              <h4 style="margin-bottom: 10px;">📊 Статистика</h4>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <p><strong>ID:</strong> ${currentUser.id}</p>
+                <p><strong>Класс:</strong> ${currentUser.class || 'Не указан'}</p>
+                <p><strong>Баланс:</strong> ${currentUser.balance} баллов</p>
+                <p><strong>Текущий титул:</strong> ${currentUser.title ? `🏆 ${currentUser.title}` : 'Нет'}</p>
+              </div>
+            </div>
+            
+            <div class="modal-buttons">
+              <button class="btn btn-secondary" onclick="closeModal('profile-modal')">Закрыть</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Modal for Search Students -->
+        <div id="search-modal" class="modal hidden">
+          <div class="modal-content" style="max-width: 600px;">
+            <h3>🔍 Поиск учеников</h3>
+            <div class="form-group">
+              <input type="text" id="search-input" placeholder="Введите имя или ID ученика..." oninput="searchStudents()">
+            </div>
+            <div id="search-results" style="max-height: 400px; overflow-y: auto;">
+              <p style="color: #666; text-align: center;">Начните вводить имя ученика</p>
+            </div>
+            <div class="modal-buttons">
+              <button class="btn btn-secondary" onclick="closeModal('search-modal')">Закрыть</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Modal for View Student Profile -->
+        <div id="student-profile-modal" class="modal hidden">
+          <div class="modal-content" style="max-width: 600px;">
+            <div id="student-profile-content">
+              Загрузка...
+            </div>
+            <div class="modal-buttons">
+              <button class="btn btn-secondary" onclick="closeModal('student-profile-modal')">Закрыть</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    async function loadStudentData() {
+      try {
+        const res = await fetch('/api/student/balance', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        
+        // Update balance display
+        document.getElementById('balance').textContent = data.balance;
+        
+        // Update currentUser with fresh data
+        currentUser.balance = data.balance;
+        currentUser.class = data.class;
+        
+        const tbody = document.querySelector('#transactions-table tbody');
+        tbody.innerHTML = data.transactions.map(t => `
+          <tr>
+            <td>${t.from_username || 'Система'}</td>
+            <td>+${t.amount}</td>
+            <td>${t.reason || ''}</td>
+            <td>${new Date(t.created_at).toLocaleString('ru')}</td>
+          </tr>
+        `).join('') || '<tr><td colspan="4">Нет транзакций</td></tr>';
+        
+        const reqBody = document.querySelector('#requests-table tbody');
+        reqBody.innerHTML = data.requests.map(r => {
+          let details = '';
+          if (r.type === 'immunity') {
+            details = `Предмет: ${r.subject || 'Не указан'}`;
+          } else if (r.type === 'bell') {
+            details = r.media_url ? `<a href="${r.media_url}" target="_blank" style="color: #667eea;">🎵 ${r.subject || 'Песня'}</a>` : '🎵 Песня на перемене';
+          }
+          return `
+            <tr>
+              <td>${r.type === 'immunity' ? '📝 Переписать работу' : '🎵 Песня на перемене'}</td>
+              <td>${details}</td>
+              <td>-${r.cost}</td>
+              <td><span class="badge badge-${r.status}">${getStatusText(r.status)}</span></td>
+              <td>${new Date(r.created_at).toLocaleString('ru')}</td>
+            </tr>
+          `;
+        }).join('') || '<tr><td colspan="5">Нет запросов</td></tr>';
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    function showImmunityModal() {
+      document.getElementById('immunity-modal').classList.remove('hidden');
+    }
+
+    function showBellModal() {
+      document.getElementById('bell-modal').classList.remove('hidden');
+      // Reset form
+      document.getElementById('bell-type').value = 'song_link';
+      updateBellForm();
+    }
+    
+    function updateBellForm() {
+      const type = document.getElementById('bell-type').value;
+      
+      // Hide all fields
+      document.getElementById('bell-link-field').classList.add('hidden');
+      document.getElementById('bell-name-field').classList.add('hidden');
+      document.getElementById('bell-video-field').classList.add('hidden');
+      
+      // Show selected field
+      if (type === 'song_link') {
+        document.getElementById('bell-link-field').classList.remove('hidden');
+      } else if (type === 'song_name') {
+        document.getElementById('bell-name-field').classList.remove('hidden');
+      } else if (type === 'video') {
+        document.getElementById('bell-video-field').classList.remove('hidden');
+      }
+    }
+
+    function showProfileSection() {
+      document.getElementById('profile-modal').classList.remove('hidden');
+      loadStudentBadges();
+      loadStudentTitles();
+    }
+
+    async function loadStudentTitles() {
+      try {
+        const res = await fetch('/api/student/titles', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const titles = await res.json();
+        
+        const select = document.getElementById('title-select');
+        select.innerHTML = '<option value="">Без титула</option>' + 
+          titles.map(t => `<option value="${t.name}" ${currentUser.title === t.name ? 'selected' : ''}>${t.icon} ${t.name}</option>`).join('');
+      } catch (err) {
+        console.error('Error loading titles:', err);
+      }
+    }
+
+    async function updateTitle() {
+      const titleName = document.getElementById('title-select').value;
+      
+      try {
+        const res = await fetch('/api/student/title', {
+          method: 'POST',
+          headers: { 
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ titleName })
+        });
+        const data = await res.json();
+        
+        if (res.ok) {
+          alert(data.message);
+          // Update currentUser with the new title
+          currentUser.title = titleName || null;
+          // Refresh user data from server to ensure sync
+          await fetchCurrentUser();
+          // Update UI
+          const titleDisplay = document.querySelector('#profile-display div:last-child');
+          if (titleDisplay) {
+            const idClassText = `ID: ${currentUser.id} | Класс: ${currentUser.class || 'Не указан'}`;
+            titleDisplay.innerHTML = idClassText + (currentUser.title ? `<br>🏆 ${currentUser.title}` : '');
+          }
+        } else {
+          alert(data.error);
+        }
+      } catch (err) {
+        alert('Ошибка при обновлении титула');
+      }
+    }
+
+    async function updateProfileColor() {
+      const color = document.getElementById('profile-color').value;
+      
+      try {
+        const res = await fetch('/api/student/profile/color', {
+          method: 'POST',
+          headers: { 
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ color })
+        });
+        const data = await res.json();
+        
+        if (res.ok) {
+          alert(data.message);
+          // Update currentUser with the new color
+          currentUser.profile_color = color;
+          // Update profile display immediately
+          const profileDisplay = document.getElementById('profile-display');
+          if (profileDisplay) {
+            profileDisplay.style.background = `linear-gradient(135deg, ${color} 0%, ${adjustColor(color, -30)} 100%)`;
+          }
+          // Refresh user data from server to ensure sync
+          await fetchCurrentUser();
+        } else {
+          alert(data.error);
+        }
+      } catch (err) {
+        alert('Ошибка при обновлении профиля');
+      }
+    }
+
+    async function showLeaderboard() {
+      const content = document.getElementById('student-content');
+      content.innerHTML = '<div class="card"><h3>🏆 Загрузка...</h3></div>';
+      
+      try {
+        // Get leaderboard first
+        const leaderboardRes = await fetch('/api/leaderboard', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (!leaderboardRes.ok) {
+          throw new Error('Ошибка загрузки таблицы лидеров');
+        }
+        
+        const leaderboard = await leaderboardRes.json();
+        
+        // Get user's rank
+        let userRank = 1;
+        let inTop100 = false;
+        
+        try {
+          const rankRes = await fetch('/api/student/rank', {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          if (rankRes.ok) {
+            const rankData = await rankRes.json();
+            userRank = rankData.rank || 1;
+            inTop100 = userRank <= 100;
+          }
+        } catch (e) {
+          console.log('Could not fetch rank, using default');
+        }
+        
+        let html = `
+          <div class="card">
+            <h3>🏆 Таблица лидеров</h3>
+            <p style="color: #666; margin-bottom: 15px;">Топ-100 учеников по количеству баллов</p>
+        `;
+        
+        // If user is not in top 100, show their rank
+        if (!inTop100 && leaderboard.length > 0) {
+          html += `
+            <div class="user-rank-card">
+              <div class="rank-label">Ваше место</div>
+              <div class="rank-number">#${userRank}</div>
+              <div class="rank-label">${currentUser.balance} баллов</div>
+            </div>
+          `;
+        }
+        
+        if (leaderboard.length === 0) {
+          html += `<p style="color: #666; text-align: center; padding: 20px;">Нет учеников в системе</p>`;
+        } else {
+          html += `
+            <div class="leaderboard-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Место</th>
+                    <th>Ученик</th>
+                    <th>Класс</th>
+                    <th>Баллы</th>
+                    <th>Титул</th>
+                  </tr>
+                </thead>
+                <tbody>
+          `;
+          
+          // Show top 100 (or less if there aren't that many)
+          const displayCount = Math.min(leaderboard.length, 100);
+          
+          for (let i = 0; i < displayCount; i++) {
+            const student = leaderboard[i];
+            const isCurrentUser = student.id === currentUser.id;
+            
+            let rowStyle = '';
+            let rowClass = '';
+            
+            if (isCurrentUser) {
+              rowClass = 'my-rank-row';
+            } else if (i === 0) {
+              rowStyle = 'background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%); font-weight: bold;';
+            } else if (i === 1) {
+              rowStyle = 'background: linear-gradient(135deg, #c0c0c0 0%, #e8e8e8 100%); font-weight: bold;';
+            } else if (i === 2) {
+              rowStyle = 'background: linear-gradient(135deg, #cd7f32 0%, #daa06d 100%); font-weight: bold;';
+            }
+            
+            const placeIcon = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i + 1);
+            
+            html += `
+              <tr class="${rowClass}" style="${rowStyle} cursor: pointer;" onclick="viewStudentProfile(${student.id})">
+                <td>${placeIcon}</td>
+                <td>${student.username}${isCurrentUser ? ' (Вы)' : ''}</td>
+                <td>${student.class || '-'}</td>
+                <td>${student.balance}</td>
+                <td>${student.title || '-'}</td>
+              </tr>
+            `;
+          }
+          
+          html += `
+                </tbody>
+              </table>
+            </div>
+          `;
+        }
+        
+        html += `</div>`;
+        content.innerHTML = html;
+        
+      } catch (err) {
+        console.error('Leaderboard error:', err);
+        content.innerHTML = `<div class="card">
+          <p style="color: #dc3545;">Ошибка загрузки таблицы лидеров.</p>
+          <p style="color: #666; margin-top: 10px;">Ошибка: ${err.message}</p>
+          <button class="btn btn-secondary" style="margin-top: 15px;" onclick="loadStudentData()">Назад</button>
+        </div>`;
+      }
+    }
+
+    function showSearchModal() {
+      document.getElementById('search-modal').classList.remove('hidden');
+      document.getElementById('search-input').value = '';
+      document.getElementById('search-results').innerHTML = '<p style="color: #666; text-align: center;">Начните вводить имя ученика</p>';
+    }
+
+    async function searchStudents() {
+      const query = document.getElementById('search-input').value.trim();
+      const resultsDiv = document.getElementById('search-results');
+      
+      if (query.length < 2) {
+        resultsDiv.innerHTML = '<p style="color: #666; text-align: center;">Введите минимум 2 символа</p>';
+        return;
+      }
+      
+      try {
+        const res = await fetch(`/api/students/search?q=${encodeURIComponent(query)}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const students = await res.json();
+        
+        if (students.length === 0) {
+          resultsDiv.innerHTML = '<p style="color: #666; text-align: center;">Ученики не найдены</p>';
+        } else {
+          resultsDiv.innerHTML = students.map(s => `
+            <div style="background: #f8f9fa; padding: 15px; margin-bottom: 10px; border-radius: 10px; cursor: pointer; transition: all 0.2s;" 
+                 onmouseover="this.style.background='#e9ecef'" 
+                 onmouseout="this.style.background='#f8f9fa'"
+                 onclick="viewStudentProfile(${s.id})">
+              <div style="font-size: 18px; font-weight: bold; color: #333;">${s.username}</div>
+              ${s.title ? `<div style="color: #667eea; font-size: 14px; margin-top: 5px;">🏆 ${s.title}</div>` : ''}
+              <div style="color: #666; font-size: 14px; margin-top: 5px;">
+                ID: ${s.id} | Класс: ${s.class || 'Не указан'} | Баллы: ${s.balance}
+              </div>
+            </div>
+          `).join('');
+        }
+      } catch (err) {
+        resultsDiv.innerHTML = '<p style="color: #dc3545; text-align: center;">Ошибка поиска</p>';
+      }
+    }
+
+    async function viewStudentProfile(studentId) {
+      closeModal('search-modal');
+      document.getElementById('student-profile-modal').classList.remove('hidden');
+      document.getElementById('student-profile-content').innerHTML = '<p style="text-align: center;">Загрузка...</p>';
+      
+      try {
+        const res = await fetch(`/api/user/${studentId}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const student = await res.json();
+        
+        const profileColor = student.profile_color || '#667eea';
+        
+        document.getElementById('student-profile-content').innerHTML = `
+          <div style="background: linear-gradient(135deg, ${profileColor} 0%, ${adjustColor(profileColor, -30)} 100%); 
+                      padding: 30px; 
+                      border-radius: 15px; 
+                      color: white; 
+                      text-align: center; 
+                      margin-bottom: 20px;">
+            <div style="font-size: 32px; font-weight: bold;">${student.username}</div>
+            ${student.title ? `<div style="font-size: 18px; margin-top: 10px; opacity: 0.95;">🏆 ${student.title}</div>` : ''}
+          </div>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 10px;">
+              <div style="color: #666; font-size: 14px;">ID</div>
+              <div style="font-size: 20px; font-weight: bold;">${student.id}</div>
+            </div>
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 10px;">
+              <div style="color: #666; font-size: 14px;">Роль</div>
+              <div style="font-size: 20px; font-weight: bold;">${getRoleName(student.role)}</div>
+            </div>
+            ${student.role === 'student' ? `
+              <div style="background: #f8f9fa; padding: 15px; border-radius: 10px;">
+                <div style="color: #666; font-size: 14px;">Класс</div>
+                <div style="font-size: 20px; font-weight: bold;">${student.class || 'Не указан'}</div>
+              </div>
+              <div style="background: #f8f9fa; padding: 15px; border-radius: 10px;">
+                <div style="color: #666; font-size: 14px;">Баланс</div>
+                <div style="font-size: 20px; font-weight: bold;">${student.balance} баллов</div>
+              </div>
+            ` : ''}
+            ${student.role === 'teacher' ? `
+              <div style="background: #f8f9fa; padding: 15px; border-radius: 10px;">
+                <div style="color: #666; font-size: 14px;">Предмет</div>
+                <div style="font-size: 20px; font-weight: bold;">${student.subject || 'Не указан'}</div>
+              </div>
+            ` : ''}
+          </div>
+          
+          ${student.titles && student.titles.length > 0 ? `
+            <div style="margin-bottom: 20px;">
+              <h4 style="margin-bottom: 10px;">🏆 Титулы</h4>
+              <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                ${student.titles.map(t => `
+                  <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                              padding: 8px 15px; 
+                              border-radius: 20px; 
+                              color: white; 
+                              font-size: 14px;
+                              font-weight: bold;"
+                       title="${t.description || ''}">
+                    ${t.icon} ${t.name}
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          ` : ''}
+          
+          ${student.badges && student.badges.length > 0 ? `
+            <div style="margin-bottom: 20px;">
+              <h4 style="margin-bottom: 10px;">🏆 Значки</h4>
+              <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                ${student.badges.map(b => `
+                  <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                              padding: 10px 15px; 
+                              border-radius: 10px; 
+                              color: white; 
+                              font-size: 24px;
+                              cursor: help;"
+                       title="${b.name}: ${b.description || ''}">
+                    ${b.icon}
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          ` : ''}
+        `;
+      } catch (err) {
+        document.getElementById('student-profile-content').innerHTML = '<p style="color: #dc3545; text-align: center;">Ошибка загрузки профиля</p>';
+      }
+    }
+
+    function adjustColor(color, amount) {
+      const num = parseInt(color.replace('#', ''), 16);
+      const r = Math.min(255, Math.max(0, (num >> 16) + amount));
+      const g = Math.min(255, Math.max(0, ((num >> 8) & 0x00FF) + amount));
+      const b = Math.min(255, Math.max(0, (num & 0x0000FF) + amount));
+      return '#' + (0x1000000 + (r << 16) + (g << 8) + b).toString(16).slice(1);
+    }
+
+    async function loadStudentBadges() {
+      try {
+        const res = await fetch('/api/student/badges', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const badges = await res.json();
+        
+        const container = document.getElementById('my-badges');
+        if (badges.length === 0) {
+          container.innerHTML = '<p style="color: #666;">У вас пока нет значков. Выполняйте миссии!</p>';
+        } else {
+          container.innerHTML = badges.map(b => `
+            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                        padding: 10px 15px; 
+                        border-radius: 10px; 
+                        color: white; 
+                        font-size: 24px;
+                        cursor: help;"
+                 title="${b.name}: ${b.description || ''}">
+              ${b.icon}
+            </div>
+          `).join('');
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.add('hidden');
+    }
+
+    function getStatusText(status) {
+      const statuses = {
+        pending: 'Ожидает',
+        approved: 'Одобрено',
+        rejected: 'Отклонено'
+      };
+      return statuses[status] || status;
+    }
+
+    async function requestImmunity() {
+      const subject = document.getElementById('immunity-subject').value;
+      
+      if (!subject) {
+        alert('Выберите предмет');
+        return;
+      }
+      
+      if (!confirm(`Запросить переписывание работы по предмету "${subject}" за 50 баллов? (Доступно раз в день)`)) return;
+      
+      try {
+        const res = await fetch('/api/student/immunity', {
+          method: 'POST',
+          headers: { 
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ subject })
+        });
+        const data = await res.json();
+        
+        if (res.ok) {
+          alert(data.message);
+          closeModal('immunity-modal');
+          // Refresh all data
+          await fetchCurrentUser();
+          loadStudentData();
+        } else {
+          alert(data.error);
+        }
+      } catch (err) {
+        alert('Ошибка при отправке запроса');
+      }
+    }
+
+    async function requestBell() {
+      const type = document.getElementById('bell-type').value;
+      let requestData = { type };
+      
+      if (type === 'song_link') {
+        const link = document.getElementById('bell-song-link').value;
+        if (!link) {
+          alert('Введите ссылку на песню');
+          return;
+        }
+        requestData.mediaUrl = link;
+        requestData.songName = 'Ссылка на песню';
+      } else if (type === 'song_name') {
+        const name = document.getElementById('bell-song-name').value;
+        if (!name) {
+          alert('Введите название песни');
+          return;
+        }
+        requestData.songName = name;
+        requestData.mediaUrl = '';
+      } else if (type === 'video') {
+        const fileInput = document.getElementById('bell-video-file');
+        if (!fileInput.files || !fileInput.files[0]) {
+          alert('Выберите файл видео');
+          return;
+        }
+        const file = fileInput.files[0];
+        if (file.size > 50 * 1024 * 1024) {
+          alert('Файл слишком большой. Максимум 50MB');
+          return;
+        }
+        // Convert to base64 for storage
+        const reader = new FileReader();
+        reader.onload = async function(e) {
+          requestData.mediaUrl = e.target.result;
+          requestData.songName = 'Видеофайл: ' + file.name;
+          await sendBellRequest(requestData);
+        };
+        reader.readAsDataURL(file);
+        return;
+      }
+      
+      await sendBellRequest(requestData);
+    }
+    
+    async function sendBellRequest(requestData) {
+      if (!confirm(`Запросить песню на перемене за 40 баллов? (Доступно раз в день)`)) return;
+      
+      try {
+        const res = await fetch('/api/student/bell', {
+          method: 'POST',
+          headers: { 
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(requestData)
+        });
+        const data = await res.json();
+        
+        if (res.ok) {
+          alert(data.message);
+          closeModal('bell-modal');
+          // Refresh all data
+          await fetchCurrentUser();
+          loadStudentData();
+        } else {
+          alert(data.error);
+        }
+      } catch (err) {
+        alert('Ошибка при отправке запроса');
+      }
+    }
+
+    function getTeacherDashboard() {
+      return `
+        <div class="balance-display">
+          <div class="label">Ваш предмет</div>
+          <div class="amount" style="font-size: 36px;">${currentUser.subject || 'Не указан'}</div>
+        </div>
+        
+        <div class="stats-grid" id="stats"></div>
+
+        <div class="card">
+          <h3>📋 Запросы по моему предмету</h3>
+          <p style="color: #666; margin-bottom: 15px;">Запросы на иммунитет от двойки по предмету "${currentUser.subject || 'Не указан'}"</p>
+          <table id="teacher-requests-table">
+            <thead>
+              <tr>
+                <th>Ученик</th>
+                <th>Класс</th>
+                <th>Тип</th>
+                <th>Стоимость</th>
+                <th>Дата</th>
+                <th>Действия</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        
+        <div class="card">
+          <h3>➕ Начислить баллы ученику</h3>
+          <p style="color: #e74c3c; margin-bottom: 15px; font-size: 14px;">⚠️ Лимит: максимум 20 баллов в день на ученика</p>
+          <div class="form-group">
+            <label>Поиск ученика</label>
+            <input type="text" id="teacher-student-search" placeholder="Введите имя или ID ученика..." oninput="searchStudentsForTeacher()">
+          </div>
+          <div id="teacher-student-results" style="max-height: 200px; overflow-y: auto; margin-bottom: 15px;"></div>
+          <div class="form-group">
+            <label>Выбранный ученик: <span id="selected-student-name" style="color: #667eea; font-weight: bold;">Не выбран</span></label>
+            <input type="hidden" id="selected-student-id" value="">
+          </div>
+          <div class="form-group">
+            <label>Оценка</label>
+            <select id="grade-select">
+              <option value="2">2 (0 баллов)</option>
+              <option value="3">3 (0 баллов)</option>
+              <option value="4">4 (5 баллов)</option>
+              <option value="5">5 (10 баллов)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Комментарий (необязательно)</label>
+            <input type="text" id="award-reason" placeholder="Причина начисления">
+          </div>
+          <button class="btn btn-success" onclick="awardPoints()">Начислить баллы</button>
+        </div>
+        
+        <div class="card">
+          <h3>ℹ️ Ваш ID</h3>
+          <p style="font-size: 24px; font-weight: bold; color: #667eea;">${currentUser.id}</p>
+          <p style="color: #666; font-size: 14px;">Поделитесь ID с учениками для добавления в друзья</p>
+        </div>
+      `;
+    }
+
+    async function loadStudents() {
+      try {
+        // Load teacher's subject requests
+        if (currentUser.subject) {
+          try {
+            const reqRes = await fetch('/api/teacher/my-requests', {
+              headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const requests = await reqRes.json();
+            
+            const reqBody = document.querySelector('#teacher-requests-table tbody');
+            reqBody.innerHTML = requests.map(r => `
+              <tr>
+                <td>${r.student_name}</td>
+                <td>${r.student_class || '-'}</td>
+                <td>${r.type === 'immunity' ? '📝 Переписать работу' : '🎵 Песня на перемене'}</td>
+                <td>${r.cost}</td>
+                <td>${new Date(r.created_at).toLocaleString('ru')}</td>
+                <td>
+                  <button class="btn-small btn-success" onclick="teacherProcessRequest(${r.id}, 'approved')">✓</button>
+                  <button class="btn-small btn-danger" onclick="teacherProcessRequest(${r.id}, 'rejected')">✗</button>
+                </td>
+              </tr>
+            `).join('') || '<tr><td colspan="6">Нет запросов по вашему предмету</td></tr>';
+          } catch (err) {
+            console.error('Error loading teacher requests:', err);
+          }
+        }
+        
+        // Load stats
+        const statsRes = await fetch('/api/stats', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const stats = await statsRes.json();
+        
+        document.getElementById('stats').innerHTML = `
+          <div class="stat-card">
+            <div class="number">${stats.totalStudents}</div>
+            <div class="label">Учеников</div>
+          </div>
+          <div class="stat-card">
+            <div class="number">${stats.totalPointsAwarded}</div>
+            <div class="label">Баллов выдано</div>
+          </div>
+        `;
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    async function searchStudentsForTeacher() {
+      const query = document.getElementById('teacher-student-search').value.trim();
+      const resultsDiv = document.getElementById('teacher-student-results');
+      
+      if (query.length < 2) {
+        resultsDiv.innerHTML = '<p style="color: #666; text-align: center; padding: 10px;">Введите минимум 2 символа для поиска</p>';
+        return;
+      }
+      
+      try {
+        const res = await fetch(`/api/students/search?q=${encodeURIComponent(query)}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const students = await res.json();
+        
+        if (students.length === 0) {
+          resultsDiv.innerHTML = '<p style="color: #666; text-align: center; padding: 10px;">Ученики не найдены</p>';
+        } else {
+          resultsDiv.innerHTML = students.map(s => `
+            <div style="background: #f8f9fa; padding: 12px; margin-bottom: 8px; border-radius: 8px; cursor: pointer; transition: all 0.2s; border: 2px solid transparent;" 
+                 onmouseover="this.style.background='#e9ecef'; this.style.borderColor='#667eea';" 
+                 onmouseout="this.style.background='#f8f9fa'; this.style.borderColor='transparent';"
+                 onclick="selectStudentForAward(${s.id}, '${s.username}', '${s.class || ''}', ${s.balance})">
+              <div style="font-size: 16px; font-weight: bold; color: #333;">${s.username}</div>
+              <div style="color: #666; font-size: 13px; margin-top: 4px;">
+                ID: ${s.id} | Класс: ${s.class || 'Не указан'} | Баллы: ${s.balance}
+              </div>
+            </div>
+          `).join('');
+        }
+      } catch (err) {
+        resultsDiv.innerHTML = '<p style="color: #dc3545; text-align: center; padding: 10px;">Ошибка поиска</p>';
+      }
+    }
+
+    function selectStudentForAward(id, username, studentClass, balance) {
+      document.getElementById('selected-student-id').value = id;
+      document.getElementById('selected-student-name').textContent = `${username} (${studentClass || 'Нет класса'}) - ${balance} баллов`;
+      document.getElementById('teacher-student-search').value = '';
+      document.getElementById('teacher-student-results').innerHTML = '';
+    }
+
+    async function teacherProcessRequest(id, status) {
+      const action = status === 'approved' ? 'одобрить' : 'отклонить';
+      if (!confirm(`Вы уверены, что хотите ${action} этот запрос?`)) return;
+      
+      try {
+        const res = await fetch(`/api/moderator/requests/${id}`, {
+          method: 'POST',
+          headers: { 
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ status })
+        });
+        const data = await res.json();
+        
+        if (res.ok) {
+          alert(data.message);
+          loadStudents();
+        } else {
+          alert(data.error);
+        }
+      } catch (err) {
+        alert('Ошибка при обработке запроса');
+      }
+    }
+
+    async function awardPoints() {
+      const studentId = document.getElementById('selected-student-id').value;
+      const grade = parseInt(document.getElementById('grade-select').value);
+      const reason = document.getElementById('award-reason').value;
+      
+      if (!studentId) {
+        alert('Выберите ученика через поиск');
+        return;
+      }
+      
+      try {
+        const res = await fetch('/api/teacher/award', {
+          method: 'POST',
+          headers: { 
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ studentId: parseInt(studentId), grade, reason })
+        });
+        const data = await res.json();
+        
+        if (res.ok) {
+          alert(data.message);
+          // Clear selection
+          document.getElementById('selected-student-id').value = '';
+          document.getElementById('selected-student-name').textContent = 'Не выбран';
+          document.getElementById('award-reason').value = '';
+          loadStudents();
+        } else {
+          alert(data.error);
+        }
+      } catch (err) {
+        alert('Ошибка при начислении баллов');
+      }
+    }
+
+    function getModeratorDashboard() {
+      return `
+        <div class="nav">
+          <button class="btn" onclick="showSection('requests')">📋 Запросы</button>
+          <button class="btn" onclick="showSection('users')">👥 Пользователи</button>
+          <button class="btn" onclick="showSection('add-points')">➕ Начислить баллы</button>
+          <button class="btn btn-secondary" onclick="showSection('stats')">📊 Статистика</button>
+          ${currentUser.role === 'owner' ? '<button class="btn btn-success" onclick="showSection(\'register\')">➕ Создать пользователя</button>' : ''}
+        </div>
+
+        <div id="mod-content"></div>
+      `;
+    }
+
+    async function loadModeratorData() {
+      showSection('requests');
+    }
+
+    function showSection(section) {
+      const content = document.getElementById('mod-content');
+      
+      switch(section) {
+        case 'requests':
+          content.innerHTML = `
+            <div class="card">
+              <h3>📋 Ожидающие запросы</h3>
+              <div style="max-height: 300px; overflow-y: auto;">
+                <table id="pending-requests-table">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Ученик</th>
+                      <th>Тип</th>
+                      <th>Детали</th>
+                      <th>Стоимость</th>
+                      <th>Дата</th>
+                      <th>Действия</th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+            </div>
+            
+            <div class="card">
+              <h3>📜 Все запросы</h3>
+              <div style="max-height: 300px; overflow-y: auto;">
+                <table id="all-requests-table">
+                  <thead>
+                    <tr>
+                      <th>Ученик</th>
+                      <th>Тип</th>
+                      <th>Детали</th>
+                      <th>Стоимость</th>
+                      <th>Статус</th>
+                      <th>Обработал</th>
+                      <th>Дата</th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+            </div>
+          `;
+          loadRequests();
+          break;
+          
+        case 'users':
+          content.innerHTML = `
+            <div class="card">
+              <h3>ℹ️ Ваш ID</h3>
+              <p style="font-size: 24px; font-weight: bold; color: #667eea;">${currentUser.id}</p>
+              <p style="color: #666; font-size: 14px;">Ваш ID для идентификации</p>
+            </div>
+            
+            <div class="card">
+              <h3>🏆 Выдать титул лидеру месяца</h3>
+              <div id="monthly-leader-info">Загрузка...</div>
+            </div>
+            
+            <div class="card">
+              <h3>👥 Все пользователи</h3>
+              <div style="max-height: 400px; overflow-y: auto;">
+                <table id="all-users-table">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Имя</th>
+                      <th>Роль</th>
+                      <th>Класс</th>
+                      <th>Предмет</th>
+                      <th>Баланс</th>
+                      <th>Титул</th>
+                      <th>Создан</th>
+                      ${currentUser.role === 'owner' ? '<th>Действия</th>' : ''}
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+            </div>
+          `;
+          loadUsers();
+          break;
+          
+        case 'add-points':
+          content.innerHTML = `
+            <div class="card">
+              <h3>➕ Начислить баллы пользователю</h3>
+              <div class="form-group">
+                <label>Выберите пользователя</label>
+                <select id="target-user-select">
+                  <option value="">Загрузка...</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Количество баллов</label>
+                <input type="number" id="points-amount" placeholder="Количество">
+              </div>
+              <div class="form-group">
+                <label>Причина</label>
+                <input type="text" id="points-reason" placeholder="Причина начисления">
+              </div>
+              <button class="btn btn-success" onclick="addPointsToUser()">Начислить</button>
+            </div>
+          `;
+          loadAllUsersForSelect();
+          break;
+          
+        case 'stats':
+          content.innerHTML = `<div id="stats-content"></div>`;
+          loadStats();
+          break;
+          
+        case 'register':
+          content.innerHTML = `
+            <div class="card">
+              <h3>➕ Создать нового пользователя</h3>
+              <div class="form-group">
+                <label>Имя пользователя</label>
+                <input type="text" id="new-username" placeholder="Имя пользователя">
+              </div>
+              <div class="form-group">
+                <label>Пароль</label>
+                <input type="password" id="new-password" placeholder="Пароль">
+              </div>
+              <div class="form-group">
+                <label>Роль</label>
+                <select id="new-role" onchange="toggleRoleFields()">
+                  <option value="student">Ученик</option>
+                  <option value="teacher">Учитель</option>
+                  ${currentUser.role === 'owner' ? '<option value="moderator">Модератор</option>' : ''}
+                </select>
+              </div>
+              <div class="form-group" id="class-field">
+                <label>Класс (для учеников)</label>
+                <input type="text" id="new-class" placeholder="Например: 5А">
+              </div>
+              <div class="form-group hidden" id="subject-field">
+                <label>Предмет (для учителей)</label>
+                <select id="new-subject">
+                  <option value="">-- Выберите предмет --</option>
+                  <option value="Математика">Математика</option>
+                  <option value="Русский язык">Русский язык</option>
+                  <option value="Литература">Литература</option>
+                  <option value="Физика">Физика</option>
+                  <option value="Химия">Химия</option>
+                  <option value="Биология">Биология</option>
+                  <option value="История">История</option>
+                  <option value="Обществознание">Обществознание</option>
+                  <option value="География">География</option>
+                  <option value="Английский язык">Английский язык</option>
+                  <option value="Информатика">Информатика</option>
+                  <option value="Физкультура">Физкультура</option>
+                  <option value="ОБЖ">ОБЖ</option>
+                  <option value="Музыка">Музыка</option>
+                  <option value="ИЗО">ИЗО</option>
+                  <option value="Технология">Технология</option>
+                </select>
+              </div>
+              <button class="btn btn-success" onclick="registerUser()">Создать</button>
+            </div>
+          `;
+          break;
+      }
+    }
+
+    async function loadRequests() {
+      try {
+        // Pending requests
+        const pendingRes = await fetch('/api/moderator/requests', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const pending = await pendingRes.json();
+        
+        const pendingBody = document.querySelector('#pending-requests-table tbody');
+        pendingBody.innerHTML = pending.map(r => {
+          let details = '';
+          if (r.type === 'immunity') {
+            details = `Предмет: <strong>${r.subject || 'Не указан'}</strong>`;
+          } else if (r.type === 'bell') {
+            details = r.media_url ? `<a href="${r.media_url}" target="_blank" style="color: #667eea;">🎵 ${r.subject || 'Песня'}</a>` : '🎵 Песня на перемене';
+          }
+          return `
+            <tr>
+              <td>${r.id}</td>
+              <td>${r.student_name} ${r.student_class ? `(${r.student_class})` : ''}</td>
+              <td>${r.type === 'immunity' ? '📝 Переписать работу' : '🎵 Песня на перемене'}</td>
+              <td>${details}</td>
+              <td>${r.cost}</td>
+              <td>${new Date(r.created_at).toLocaleString('ru')}</td>
+              <td>
+                <button class="btn-small btn-success" onclick="processRequest(${r.id}, 'approved')">✓</button>
+                <button class="btn-small btn-danger" onclick="processRequest(${r.id}, 'rejected')">✗</button>
+              </td>
+            </tr>
+          `;
+        }).join('') || '<tr><td colspan="7">Нет ожидающих запросов</td></tr>';
+        
+        // All requests
+        const allRes = await fetch('/api/moderator/requests/all', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const all = await allRes.json();
+        
+        const allBody = document.querySelector('#all-requests-table tbody');
+        allBody.innerHTML = all.slice(0, 20).map(r => {
+          let details = '';
+          if (r.type === 'immunity') {
+            details = `Предмет: ${r.subject || 'Не указан'}`;
+          } else if (r.type === 'bell') {
+            details = r.media_url ? `<a href="${r.media_url}" target="_blank" style="color: #667eea;">🎵 ${r.subject || 'Песня'}</a>` : '🎵 Песня на перемене';
+          }
+          return `
+            <tr>
+              <td>${r.student_name} ${r.student_class ? `(${r.student_class})` : ''}</td>
+              <td>${r.type === 'immunity' ? '📝 Переписать работу' : '🎵 Песня на перемене'}</td>
+              <td>${details}</td>
+              <td>${r.cost}</td>
+              <td><span class="badge badge-${r.status}">${getStatusText(r.status)}</span></td>
+              <td>${r.processed_by_name || '-'}</td>
+              <td>${new Date(r.created_at).toLocaleString('ru')}</td>
+            </tr>
+          `;
+        }).join('') || '<tr><td colspan="7">Нет запросов</td></tr>';
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    async function processRequest(id, status) {
+      const action = status === 'approved' ? 'одобрить' : 'отклонить';
+      if (!confirm(`Вы уверены, что хотите ${action} этот запрос?`)) return;
+      
+      try {
+        const res = await fetch(`/api/moderator/requests/${id}`, {
+          method: 'POST',
+          headers: { 
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ status })
+        });
+        const data = await res.json();
+        
+        if (res.ok) {
+          alert(data.message);
+          loadRequests();
+        } else {
+          alert(data.error);
+        }
+      } catch (err) {
+        alert('Ошибка при обработке запроса');
+      }
+    }
+
+    async function loadUsers() {
+      try {
+        const res = await fetch('/api/moderator/users', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const users = await res.json();
+        
+        const tbody = document.querySelector('#all-users-table tbody');
+        tbody.innerHTML = users.map(u => `
+          <tr>
+            <td>${u.id}</td>
+            <td>${u.username}</td>
+            <td><span class="role-badge role-${u.role}">${getRoleName(u.role)}</span></td>
+            <td>${u.class || '-'}</td>
+            <td>${u.subject || '-'}</td>
+            <td>${u.balance}</td>
+            <td>${u.title || '-'}</td>
+            <td>${new Date(u.created_at).toLocaleString('ru')}</td>
+            ${currentUser.role === 'owner' ? `
+              <td>
+                ${u.role !== 'owner' ? `<button class="btn-small btn-danger" onclick="deleteUser(${u.id}, '${u.username}')">Удалить</button>` : ''}
+                ${u.role === 'student' ? `<button class="btn-small btn-success" onclick="showTitleModal(${u.id}, '${u.username}')">Титул</button>` : ''}
+              </td>
+            ` : ''}
+          </tr>
+        `).join('');
+        
+        // Load monthly leader
+        try {
+          const leaderRes = await fetch('/api/leaderboard/monthly', {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          const leaderData = await leaderRes.json();
+          
+          const leaderInfo = document.getElementById('monthly-leader-info');
+          if (leaderData.leader) {
+            leaderInfo.innerHTML = `
+              <p><strong>Лидер месяца:</strong> ${leaderData.leader.username} (${leaderData.leader.class || 'Нет класса'})</p>
+              <p><strong>Баллы:</strong> ${leaderData.leader.balance}</p>
+              <div class="form-group" style="margin-top: 10px;">
+                <label>Титул для лидера:</label>
+                <input type="text" id="leader-title" placeholder="Например: Король месяца">
+              </div>
+              <button class="btn btn-success" onclick="awardLeaderTitle(${leaderData.leader.id})">Выдать титул</button>
+            `;
+          } else {
+            leaderInfo.innerHTML = '<p style="color: #666;">Нет учеников</p>';
+          }
+        } catch (err) {
+          console.error('Error loading leader:', err);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    function getRoleName(role) {
+      const roles = {
+        student: 'Ученик',
+        teacher: 'Учитель',
+        moderator: 'Модератор',
+        owner: 'Владелец'
+      };
+      return roles[role] || role;
+    }
+
+    async function loadAllUsersForSelect() {
+      try {
+        const res = await fetch('/api/moderator/users', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const users = await res.json();
+        
+        const select = document.getElementById('target-user-select');
+        select.innerHTML = '<option value="">Выберите пользователя</option>' + 
+          users.map(u => `<option value="${u.id}">${u.username} (${getRoleName(u.role)}) ${u.class ? `- ${u.class}` : ''} - ${u.balance} баллов</option>`).join('');
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    async function addPointsToUser() {
+      const userId = document.getElementById('target-user-select').value;
+      const amount = document.getElementById('points-amount').value;
+      const reason = document.getElementById('points-reason').value;
+      
+      if (!userId || !amount) {
+        alert('Заполните все поля');
+        return;
+      }
+      
+      try {
+        const res = await fetch('/api/moderator/add-points', {
+          method: 'POST',
+          headers: { 
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ userId: parseInt(userId), amount: parseInt(amount), reason })
+        });
+        const data = await res.json();
+        
+        if (res.ok) {
+          alert(data.message);
+          document.getElementById('target-user-select').value = '';
+          document.getElementById('points-amount').value = '';
+          document.getElementById('points-reason').value = '';
+          loadAllUsersForSelect();
+        } else {
+          alert(data.error);
+        }
+      } catch (err) {
+        alert('Ошибка при начислении баллов');
+      }
+    }
+
+    async function loadStats() {
+      try {
+        const res = await fetch('/api/stats', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const stats = await res.json();
+        
+        document.getElementById('stats-content').innerHTML = `
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="number">${stats.totalStudents}</div>
+              <div class="label">Учеников</div>
+            </div>
+            <div class="stat-card">
+              <div class="number">${stats.totalTeachers}</div>
+              <div class="label">Учителей</div>
+            </div>
+            <div class="stat-card">
+              <div class="number">${stats.totalModerators}</div>
+              <div class="label">Модераторов</div>
+            </div>
+            <div class="stat-card">
+              <div class="number">${stats.totalPointsAwarded}</div>
+              <div class="label">Баллов выдано</div>
+            </div>
+            <div class="stat-card">
+              <div class="number">${stats.pendingRequests}</div>
+              <div class="label">Ожидающих запросов</div>
+            </div>
+          </div>
+        `;
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    function toggleRoleFields() {
+      const role = document.getElementById('new-role').value;
+      const classField = document.getElementById('class-field');
+      const subjectField = document.getElementById('subject-field');
+      
+      if (role === 'student') {
+        classField.classList.remove('hidden');
+        subjectField.classList.add('hidden');
+      } else if (role === 'teacher') {
+        classField.classList.add('hidden');
+        subjectField.classList.remove('hidden');
+      } else {
+        classField.classList.add('hidden');
+        subjectField.classList.add('hidden');
+      }
+    }
+
+    async function registerUser() {
+      const username = document.getElementById('new-username').value;
+      const password = document.getElementById('new-password').value;
+      const role = document.getElementById('new-role').value;
+      const userClass = document.getElementById('new-class').value;
+      const subject = document.getElementById('new-subject').value;
+      
+      if (!username || !password) {
+        alert('Заполните все обязательные поля');
+        return;
+      }
+      
+      if (role === 'teacher' && !subject) {
+        alert('Выберите предмет для учителя');
+        return;
+      }
+      
+      try {
+        const res = await fetch('/api/register', {
+          method: 'POST',
+          headers: { 
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ username, password, role, class: userClass, subject })
+        });
+        const data = await res.json();
+        
+        if (res.ok) {
+          alert(`Пользователь ${username} создан!`);
+          document.getElementById('new-username').value = '';
+          document.getElementById('new-password').value = '';
+          document.getElementById('new-class').value = '';
+          document.getElementById('new-subject').value = '';
+          loadUsers();
+        } else {
+          alert(data.error);
+        }
+      } catch (err) {
+        alert('Ошибка при создании пользователя');
+      }
+    }
+
+    async function deleteUser(id, username) {
+      if (!confirm(`Удалить пользователя ${username}?`)) return;
+      
+      try {
+        const res = await fetch(`/api/moderator/users/${id}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        
+        if (res.ok) {
+          alert(data.message);
+          loadUsers();
+        } else {
+          alert(data.error);
+        }
+      } catch (err) {
+        alert('Ошибка при удалении');
+      }
+    }
+
+    function showTitleModal(userId, username) {
+      const title = prompt(`Введите титул для ${username}:`);
+      if (title && title.trim()) {
+        setUserTitle(userId, title.trim());
+      }
+    }
+
+    async function setUserTitle(userId, title) {
+      try {
+        const res = await fetch('/api/moderator/set-title', {
+          method: 'POST',
+          headers: { 
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ userId, title })
+        });
+        const data = await res.json();
+        
+        if (res.ok) {
+          alert(data.message);
+          loadUsers();
+        } else {
+          alert(data.error);
+        }
+      } catch (err) {
+        alert('Ошибка при установке титула');
+      }
+    }
+
+    async function awardLeaderTitle(userId) {
+      const titleInput = document.getElementById('leader-title');
+      if (!titleInput) return;
+      
+      const title = titleInput.value;
+      if (!title || !title.trim()) {
+        alert('Введите титул для лидера');
+        return;
+      }
+      
+      if (!confirm(`Выдать титул "${title}" лидеру месяца?`)) return;
+      
+      try {
+        const res = await fetch('/api/moderator/grant-title', {
+          method: 'POST',
+          headers: { 
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ userId, titleName: title.trim() })
+        });
+        const data = await res.json();
+        
+        if (res.ok) {
+          alert(data.message);
+          loadUsers();
+        } else {
+          alert(data.error);
+        }
+      } catch (err) {
+        alert('Ошибка при выдаче титула');
+      }
+    }
+
+    function showError(elementId, message) {
+      const el = document.getElementById(elementId);
+      el.textContent = message;
+      el.classList.remove('hidden');
+      setTimeout(() => el.classList.add('hidden'), 3000);
+    }
+  </script>
+</body>
+</html>
