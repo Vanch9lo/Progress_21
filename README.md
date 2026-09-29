@@ -162,6 +162,6 @@ school-points-system/
 - **Auth:** JWT, bcrypt
 - **Frontend:** HTML, CSS, JavaScript
 
----
+
 
 Создано с ❤️ для школьного сообщества
